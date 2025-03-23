@@ -1,5 +1,10 @@
 .env
 
+# Ignore audio files, store separately and not upload to github
+*.wav
+*.mp3
+*.m4a
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
