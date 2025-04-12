@@ -1,4 +1,5 @@
 .env
+hifi_gan
 
 # Ignore audio files, store separately and not upload to github
 *.wav
