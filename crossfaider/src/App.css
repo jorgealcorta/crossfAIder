@@ -1,0 +1,22 @@
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    color: #f0f0f0;
+  }
+  
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .timeline-container {
+    display: flex;
+    height: 180px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
