@@ -1,14 +1,18 @@
 from models.generator import UNetGenerator
 from models.discriminator import Discriminator
-from dataset import MelTransitionDataset
+from models.dataset import MelTransitionDataset
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import pandas as pd
+import os
 
-# TODO: import dataset and train GAN
-# df = pd.read_csv("transitions_dataset.csv")
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+MEL_DIR = os.path.join(ROOT_DIR, "res", "mel_specs")
+DATASET_DIR = os.path.join(ROOT_DIR, "res", "datasets")
+
+df = pd.read_csv(os.path.join(DATASET_DIR, "transition_dataset_processed.csv"))
 dataset = MelTransitionDataset(df)
 loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
