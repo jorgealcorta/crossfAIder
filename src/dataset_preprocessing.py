@@ -27,7 +27,7 @@ def extract_segment(y, sr, start, end):
     return y[start_sample:end_sample]
 
 def audio_to_mel(y, sr):
-    mel = librosa.feature.melspectrogram(y, sr=sr, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mels=N_MELS)
+    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mels=N_MELS)
     mel_db = librosa.power_to_db(mel, ref=np.max)
     return mel_db
 
@@ -72,17 +72,17 @@ def process_row(row):
     mel_b = audio_to_mel(segment_b, SAMPLE_RATE)
     
     # Process Transition
-    transition_path = ROOT_DIR / row['transition_filename']
+    transition_path = os.path.join(TRANSITIONS_DIR,  row['transition_filename'])
     y_tr, _ = librosa.load(transition_path, sr=SAMPLE_RATE)
     mel_tr = audio_to_mel(y_tr, SAMPLE_RATE)
     
     # Save MEL spectrograms
-    mel_a_path = MEL_DIR / f"mel_a_{Path(row['track_a_filename']).stem}.npy"
-    mel_b_path = MEL_DIR / f"mel_b_{Path(row['track_b_filename']).stem}.npy"
-    mel_tr_path = MEL_DIR / f"mel_tr_{Path(row['transition_filename']).stem}.npy"
+    mel_a_path = os.path.join( MEL_DIR, f"mel_a_{Path(row['track_a_filename']).stem}.npy" )
+    mel_b_path = os.path.join( MEL_DIR, f"mel_b_{Path(row['track_b_filename']).stem}.npy" )
+    mel_tr_path = os.path.join( MEL_DIR, f"mel_tr_{Path(row['transition_filename']).stem}.npy" )
     
     for path, mel in [(mel_a_path, mel_a), (mel_b_path, mel_b), (mel_tr_path, mel_tr)]:
-        if not path.exists():
+        if not os.path.exists(path):
             save_mel(mel, str(path))
     
     return pd.Series({
