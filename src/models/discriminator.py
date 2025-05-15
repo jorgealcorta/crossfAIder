@@ -8,7 +8,8 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2),
             nn.Conv2d(64, 128, 4, stride=2, padding=1),
             nn.LeakyReLU(0.2),
-            nn.Conv2d(128, 1, 4, stride=1, padding=1),
+            nn.AdaptiveAvgPool2d((30, 30)),  # Force output to 30x30
+            nn.Conv2d(128, 1, 1),
             nn.Sigmoid()
         )
 

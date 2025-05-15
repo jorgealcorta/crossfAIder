@@ -32,10 +32,10 @@ for epoch in range(50):
         # Train Discriminator
         D.zero_grad()
         real_input = torch.cat([x, y], dim=1)
-        real_label = torch.ones(x.size(0), 1, 30, 30).to(device)
+        real_label = torch.ones_like(D(real_input))
         fake_transition = G(x)
         fake_input = torch.cat([x, fake_transition.detach()], dim=1)
-        fake_label = torch.zeros(x.size(0), 1, 30, 30).to(device)
+        fake_label = torch.zeros_like(D(fake_input))
 
         loss_real = loss_fn(D(real_input), real_label)
         loss_fake = loss_fn(D(fake_input), fake_label)

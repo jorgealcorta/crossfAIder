@@ -42,16 +42,15 @@ class MelTransitionDataset(Dataset):
         return input_pair, mel_t
 
     def _pad_with_context(self, spectrogram, target_time):
-        """Pad the spectrogram by repeating its last frame."""
+        """Pad the spectrogram with zeroes."""
         current_time = spectrogram.shape[-1]
         if current_time < target_time:
-            # Repeat the last frame for padding
-            pad_frames = spectrogram[:, -1].reshape(-1, 1)  # shape: (n_mels, 1)
-            pad_repeats = target_time - current_time
-            padded_spec = np.hstack([spectrogram, np.tile(pad_frames, pad_repeats)])
+            # Zero-padding
+            pad_width = ((0, 0), (0, target_time - current_time))
+            padded_spec = np.pad(spectrogram, pad_width, mode='constant')
             return padded_spec
         else:
-            return spectrogram
+            return spectrogram 
 
 if __name__ == "__main__":
     import pandas as pd
