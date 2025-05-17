@@ -15,6 +15,7 @@ HOP_LENGTH = config["hop_length"]
 WIDTH_LENGTH = config["win_length"]
 N_MELS = config["n_mels"]    # 128 for Griffin-Lim, 80 for HIFI-GAN and and melGAN,
 N_ITER = config["n_iter"]   # number of iterations, only if using Griffin-Lim (128 gets good quality without taking ages
+GLOBAL_REF = config["global_ref"]
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 MEL_DIR = os.path.join(ROOT_DIR, "res", "mel_specs")
@@ -33,14 +34,13 @@ def extract_segment(y, sr, start, end):
     end_sample = int(end * sr)
     return y[start_sample:end_sample]
 
-def audio_to_mel(y, sr):
-    mel_power = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mels=N_MELS)
-    mel_db = librosa.power_to_db(mel_power, ref=np.max)     # np.max in ref is crucial!!
-    return mel_db, mel_power
+def audio_to_mel(y):
+    mel_power = librosa.feature.melspectrogram(y=y, sr=SAMPLE_RATE, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mels=N_MELS)
+    mel_db = librosa.power_to_db(mel_power, ref=GLOBAL_REF)     # The reference here is crucial
+    return mel_db 
 
-def save_mel_and_ref(mel_path, mel, ref_path, mel_ref):
+def save_mel(mel_path, mel):
     np.save(mel_path, mel)
-    np.save(ref_path, np.max(mel_ref))
 
 def get_global_ref(df):
 
@@ -82,33 +82,31 @@ def process_row(row):
     # Process Track A
     track_a_path = os.path.join(TRACKS_DIR, row['track_a_filename'])
     y_a, _ = librosa.load(track_a_path, sr=SAMPLE_RATE)
-    mel_a_db, mel_a_power = audio_to_mel(y_a, SAMPLE_RATE)
+    mel_a = audio_to_mel(y_a)
     
     # Process Track B
     track_b_path = os.path.join(TRACKS_DIR, row['track_b_filename'])
     y_b, _ = librosa.load(track_b_path, sr=SAMPLE_RATE)
-    mel_b_db, mel_b_power = audio_to_mel(y_b, SAMPLE_RATE)
+    mel_b = audio_to_mel(y_b)
     
     # Process Transition
     transition_path = os.path.join(TRANSITIONS_DIR,  row['transition_filename'])
     y_tr, _ = librosa.load(transition_path, sr=SAMPLE_RATE)
-    mel_tr_db, mel_tr_power = audio_to_mel(y_tr, SAMPLE_RATE)
+    mel_tr = audio_to_mel(y_tr)
     
     # Save MEL spectrograms
-    mel_a_db_path = os.path.join( MEL_DIR, f"mel_track_{Path(row['track_a_filename']).stem}.npy" )
-    mel_b_db_path = os.path.join( MEL_DIR, f"mel_track_{Path(row['track_b_filename']).stem}.npy" )
-    mel_tr_db_path = os.path.join( MEL_DIR, f"mel_transition_{Path(row['transition_filename']).stem}.npy" )
-    mel_a_db_ref_path = os.path.join( MEL_DIR, f"mel_ref_{Path(row['track_a_filename']).stem}.npy" )
-    mel_b_db_ref_path = os.path.join( MEL_DIR, f"mel_ref_{Path(row['track_b_filename']).stem}.npy" )
-    mel_tr_db_ref_path = os.path.join( MEL_DIR, f"mel_ref_{Path(row['transition_filename']).stem}.npy" )
+    mel_a_path = os.path.join( MEL_DIR, f"mel_track_{Path(row['track_a_filename']).stem}.npy" )
+    mel_b_path = os.path.join( MEL_DIR, f"mel_track_{Path(row['track_b_filename']).stem}.npy" )
+    mel_tr_path = os.path.join( MEL_DIR, f"mel_transition_{Path(row['transition_filename']).stem}.npy" )
     
-    for path_db, mel_db, path_db_ref, mel_db_ref in [
-        (mel_a_db_path, mel_a_db, mel_a_db_ref_path, mel_a_power),
-        (mel_b_db_path, mel_b_db, mel_b_db_ref_path, mel_b_power), 
-        (mel_tr_db_path, mel_tr_db, mel_tr_db_ref_path, mel_tr_power)
+    for path_db, mel_db in [
+        (mel_a_path, mel_a),
+        (mel_b_path, mel_b), 
+        (mel_tr_path, mel_tr)
         ]:
+
         if not os.path.exists(path_db):
-            save_mel_and_ref(str(path_db), mel_db, str(path_db_ref), mel_db_ref)
+            save_mel(str(path_db), mel_db) 
     
     return pd.Series({
         'track_a_path': str(row['track_a_filename']),
@@ -123,12 +121,9 @@ def process_row(row):
         'key_b': row['key_b'],
         'bpm_b': row['bpm_b'],
         'transition_type': row['transition_type'],
-        'mel_a_path': str(os.path.basename(mel_a_db_path)),
-        'mel_a_ref_path': str(os.path.basename(mel_a_db_ref_path)),
-        'mel_b_path': str(os.path.basename(mel_b_db_path)),
-        'mel_b_ref_path': str(os.path.basename(mel_b_db_ref_path)),
-        'mel_tr_path': str(os.path.basename(mel_tr_db_path)),
-        'mel_tr_ref_path': str(os.path.basename(mel_tr_db_ref_path)),
+        'mel_a_path': str(os.path.basename(mel_a_path)),
+        'mel_b_path': str(os.path.basename(mel_b_path)),
+        'mel_tr_path': str(os.path.basename(mel_tr_path)),
     })
 
 def process_dataset(csv_path, output_csv_path):
@@ -147,7 +142,5 @@ def process_dataset(csv_path, output_csv_path):
 
 if __name__ == "__main__":
     csv_path = os.path.join(DATASET_DIR, "transition_dataset_raw.csv")
-    output_path = os.path.join(DATASET_DIR, "transition_dataset_processed_II.csv")
-    #process_dataset(csv_path, output_path)
-    df = pd.read_csv(csv_path)
-    print(get_global_ref(df))
+    output_path = os.path.join(DATASET_DIR, "transition_dataset_processed_III.csv")
+    process_dataset(csv_path, output_path)
