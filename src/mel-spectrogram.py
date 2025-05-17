@@ -15,12 +15,16 @@ import torch
 import json
 
 # === 1. Load the audio ===
-
-TRACKS_PATH = os.path.join(ROOT_DIR, "tracks")
+RES_PATH = os.path.join(ROOT_DIR, "res")
+AUDIO_PATH = os.path.join(RES_PATH, "audio")
+MEL_PATH = os.path.join(RES_PATH, "mel_specs")
+TRACKS_PATH = os.path.join(AUDIO_PATH, "tracks")
+TRANSITIONS_PATH = os.path.join(AUDIO_PATH, "transitions")
 OUTPUTS_PATH = os.path.join(ROOT_DIR, "outputs")
-FILE_INPUT_NAME = "test_transition.mp3"
-FILE_OUTPUT_NAME = "reconstructed_transition.mp3"
-INPUT_PATH = os.path.join(TRACKS_PATH, FILE_INPUT_NAME)
+
+FILE_INPUT_NAME = "mel_transition_cachalote-whoLovesTheSun_EQ-out.npy"
+FILE_OUTPUT_NAME = "reconstructed_transition.wav"
+INPUT_PATH = os.path.join(MEL_PATH, FILE_INPUT_NAME)
 OUTPUT_PATH = os.path.join(OUTPUTS_PATH, FILE_OUTPUT_NAME)
 
 # Weights and configuration for HIFI-GAN
@@ -30,28 +34,36 @@ HIFIGAN_CONFIG = os.path.join(ROOT_DIR, "hifi_gan", "weights", "LJ_V3", "config.
 # Method: 0 = Griffin-Lim; 1 = HIFI-GAN; 2 = melGAN inverse vocoder
 RECONSTRUCTION_METHOD = 0
 
-# === Mel Spectrogram parameters ===
+# Mel Spectrogram parameters
+with open("config.json", "r") as f:
+    config = json.load(f)
 
-sr = 22050
-n_fft = 1024
-hop_length = 256
-win_length = 1024
-n_mels = 128    # 128 for Griffin-Lim, 80 for HIFI-GAN and and melGAN,
-n_iter = 1024   # number of iterations, only if using Griffin-Lim
+SAMPLE_RATE = config["sr"] 
+N_FFT = config["n_fft"]
+HOP_LENGTH = config["hop_length"]
+WIDTH_LENGTH = config["win_length"]
+N_MELS = config["n_mels"]    # 128 for Griffin-Lim, 80 for HIFI-GAN and and melGAN,
+N_ITER = config["n_iter"]   # number of iterations, only if using Griffin-Lim (128 gets good quality without taking age
+
+# Load
+# y, _ = librosa.load(INPUT_PATH, sr=SAMPLE_RATE)
+# print(f"Loaded {INPUT_PATH}, duration: {len(y)/SAMPLE_RATE:.2f}s")
 
 # === 2. Convert to Mel-Spectrogram ===
 
-y, _ = librosa.load(INPUT_PATH, sr=sr)
-print(f"Loaded {INPUT_PATH}, duration: {len(y)/sr:.2f}s")
-
-mel = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+# mel_power = librosa.feature.melspectrogram(y=y, sr=SAMPLE_RATE, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mels=N_MELS)
+# mel_db = librosa.power_to_db(mel_power, ref=np.max) # Don't forget np.max!
+# np.save('mel_db.npy', mel_db) 
+# np.save('mel_db_ref.npy', np.max(mel_power))
+mel_db = np.load(INPUT_PATH)
+global_ref = config["global_ref"]
 
 # === 3. Plot the Spectrogram ===
 def plot_spectrogram(mel_spec, save : bool = True):
     
     mel_db = librosa.power_to_db(mel_spec, ref=np.max)
     plt.figure(figsize=(10, 4))
-    librosa.display.specshow(mel_db, sr=sr, hop_length=256, x_axis='time', y_axis='mel')
+    librosa.display.specshow(mel_db, sr=SAMPLE_RATE, hop_length=256, x_axis='time', y_axis='mel')
     plt.colorbar(format='%+2.0f dB')
     plt.title('Mel-Spectrogram')
     plt.tight_layout()
@@ -60,7 +72,7 @@ def plot_spectrogram(mel_spec, save : bool = True):
         plt.savefig("mel_spectrogram.png")
     # plt.show()
 
-plot_spectrogram(mel, False)
+# plot_spectrogram(mel, False)
 
 # === 4. Convert back to audio ===
 
@@ -115,10 +127,13 @@ else:
     # Base reconstruction method: Griffin-Lim
     # mel = mel / np.max(mel) # Normalized mel - might work better, not using rn
 
+    print(f"Reverting {INPUT_PATH} to power scale")
+    mel_power = librosa.db_to_power(mel_db, ref=global_ref)  # Revert to power scale
+    print(f"Reconstructing audio from {INPUT_PATH}")
     reconstructed_audio = librosa.feature.inverse.mel_to_audio(
-        mel, sr=sr, n_fft=n_fft, hop_length=hop_length, n_iter=n_iter
+        mel_power, sr=SAMPLE_RATE, n_fft=N_FFT, hop_length=HOP_LENGTH, n_iter=N_ITER
     )
 
 # === 5. Save Reconstructed Audio ===
-sf.write(OUTPUT_PATH, reconstructed_audio, sr)
+sf.write(OUTPUT_PATH, reconstructed_audio, SAMPLE_RATE)
 print(f"✅ Audio reconstructed and saved to '{OUTPUT_PATH}'")
