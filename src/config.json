@@ -1,0 +1,9 @@
+{
+    "sr": 22050,
+    "n_fft": 1024,
+    "hop_length": 256,
+    "win_length": 1024,
+    "n_mels": 128,
+    "n_iter": 128,
+    "global_ref": 2310.424 
+}
