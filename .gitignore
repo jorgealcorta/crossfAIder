@@ -25,6 +25,7 @@ eggs/
 lib/
 lib64/
 res/
+outputs/
 parts/
 sdist/
 var/
