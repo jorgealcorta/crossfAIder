@@ -5,18 +5,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-# Config
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-SAMPLE_RATE = config["sr"] 
-N_FFT = config["n_fft"]
-HOP_LENGTH = config["hop_length"]
-WIDTH_LENGTH = config["win_length"]
-N_MELS = config["n_mels"]    # 128 for Griffin-Lim, 80 for HIFI-GAN and and melGAN,
-N_ITER = config["n_iter"]   # number of iterations, only if using Griffin-Lim (128 gets good quality without taking ages
-GLOBAL_REF = config["global_ref"]
-
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 MEL_DIR = os.path.join(ROOT_DIR, "res", "mel_specs")
 DATASET_DIR = os.path.join(ROOT_DIR, "res", "datasets")
@@ -29,6 +17,19 @@ PRE_TRANSITION_DURATION = 0
 os.makedirs(MEL_DIR, exist_ok=True)
 os.makedirs(DATASET_DIR, exist_ok=True)
 
+# Config
+with open(os.path.join(ROOT_DIR, "res", "config", "config.json"), "r") as f:
+    config = json.load(f)
+
+SAMPLE_RATE = config["sr"] 
+N_FFT = config["n_fft"]
+HOP_LENGTH = config["hop_length"]
+WIDTH_LENGTH = config["win_length"]
+N_MELS = config["n_mels"]    # 128 for Griffin-Lim, 80 for HIFI-GAN and and melGAN,
+N_ITER = config["n_iter"]   # number of iterations, only if using Griffin-Lim (128 gets good quality without taking ages
+GLOBAL_REF = config["global_ref"]
+
+
 def extract_segment(y, sr, start, end):
     start_sample = int(start * sr)
     end_sample = int(end * sr)
@@ -36,8 +37,8 @@ def extract_segment(y, sr, start, end):
 
 def audio_to_mel(y):
     mel_power = librosa.feature.melspectrogram(y=y, sr=SAMPLE_RATE, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mels=N_MELS)
-    mel_db = librosa.power_to_db(mel_power, ref=GLOBAL_REF)     # The reference here is crucial
-    return mel_db 
+    mel_db = librosa.power_to_db(mel_power, ref=GLOBAL_REF, top_db=80)     # The reference here is crucial
+    return np.clip(mel_db, a_min=-80, a_max=0)  # Hard clipping to [-80, 0] dB
 
 def save_mel(mel_path, mel):
     np.save(mel_path, mel)
@@ -142,5 +143,5 @@ def process_dataset(csv_path, output_csv_path):
 
 if __name__ == "__main__":
     csv_path = os.path.join(DATASET_DIR, "transition_dataset_raw.csv")
-    output_path = os.path.join(DATASET_DIR, "transition_dataset_processed_III.csv")
+    output_path = os.path.join(DATASET_DIR, "transition_dataset_processed_IV.csv")
     process_dataset(csv_path, output_path)
