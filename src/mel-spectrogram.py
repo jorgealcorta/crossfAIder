@@ -22,7 +22,7 @@ TRACKS_PATH = os.path.join(AUDIO_PATH, "tracks")
 TRANSITIONS_PATH = os.path.join(AUDIO_PATH, "transitions")
 OUTPUTS_PATH = os.path.join(ROOT_DIR, "outputs")
 
-FILE_INPUT_NAME = "mel_transition_cachalote-whoLovesTheSun_EQ-out.npy"
+FILE_INPUT_NAME = "mel_transition_synesthesia-loophole_EQ-out.npy"
 FILE_OUTPUT_NAME = "reconstructed_transition.wav"
 INPUT_PATH = os.path.join(MEL_PATH, FILE_INPUT_NAME)
 OUTPUT_PATH = os.path.join(OUTPUTS_PATH, FILE_OUTPUT_NAME)
@@ -35,7 +35,7 @@ HIFIGAN_CONFIG = os.path.join(ROOT_DIR, "hifi_gan", "weights", "LJ_V3", "config.
 RECONSTRUCTION_METHOD = 0
 
 # Mel Spectrogram parameters
-with open("config.json", "r") as f:
+with open(os.path.join(ROOT_DIR, "res", "config", "config.json"), "r") as f:
     config = json.load(f)
 
 SAMPLE_RATE = config["sr"] 
