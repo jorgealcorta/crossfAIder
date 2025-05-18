@@ -1,0 +1,31 @@
+track_a_name,track_a_filename,track_b_name,track_b_filename,start_time_a,end_time_a,start_time_b,end_time_b,transition_filename,transition_duration,transition_bpm,key_a,bpm_a,key_b,bpm_b,transition_type
+Water,"Bicep, Clara La San - Water.mp3",So U Kno,Overmono - So U Kno.mp3,00:02:42.8,00:03:14.8,0:00:00,0:00:23,Water-SoUKno_EQ-out.mp3,,,Em,130,Gm,130,EQ-out
+All Night Long,Chris Stussy - All Night Long.mp3,Xapiadora (Extended Mix),Dj Windows 7 - Xapiadora (Extended Mix).mp3,0:02:55,0:03:04,00:00:18.6,00:00:29.8,allnight-Xapiadora_EQ-out.mp3,,,Fm,133,F#m,129,EQ-out
+Crazy,"Mall Grab, False Persona - Crazy.mp3",mangata (DIE MIKE Extended Club Mix),DIE MIKE - mangata (DIE MIKE Extended Club M.mp3,00:03:53.3,00:03:56.7,00:01:17.7,00:01:24.3,crazy-mangata_EQ-out.mp3,,,Bbm,140,Ebm,136,EQ-out
+"flex fm (freddit) feat. Future, Lil Yachty, Playboi Carti","Joy Orbison, Lil Yachty, Future, Playboi Carti - flex fm (freddit) feat. Future, Lil Yachty, Playboi Carti.mp3",Iruka,Alarico - Iruka.mp3,00:03:06.9,0:03:32,00:00:59.8,00:01:03.2,flightfmfred-iruka_EQ-out.mp3,,,Dm,140,Bm,141,EQ-out
+mangata (DIE MIKE Extended Club Mix),DIE MIKE - mangata (DIE MIKE Extended Club M.mp3,All Night Long,Chris Stussy - All Night Long.mp3,00:04:17.6,00:04:21.2,00:00:34.3,00:00:37.9,mangata-allnight_EQ-out.mp3,,,Ebm,136,Fm,133,EQ-out
+Concave,Aloka - Concave.mp3,Mauna Kea,"Anf, Priori, Dust-e-1 - Mauna Kea.mp3",0:02:07.4,0:02:42,0:02:04,0:02:23,concave-maunaKea_EQ-out.mp3,,,F#m,130,Fm,128,EQ-out
+Mauna Kea,"Anf, Priori, Dust-e-1 - Mauna Kea.mp3",Synesthesia,Nathan Melja - Synesthesia (Pariah Remix).mp3,0:02:39,0:03:06,0:00:38,0:00:59,maunaKea-synesthesia_EQ-out.mp3,,,Fm,128,Bm,130,EQ-out
+Synesthesia,Nathan Melja - Synesthesia (Pariah Remix).mp3,Loophole,Youandewan - Loophole.mp3,0:05:19.5,0:05:39.5,0:00:3.6,0:00:24.6,synesthesia-loophole_EQ-out.mp3,,,Bm,130,Fm,132,EQ-out
+Loophole,Youandewan - Loophole.mp3,Gorgon sound,Horsepower Productions - Gorgon Sound.mp3,0:03:30.9,0:03:50.9,0:00:00,0:00:05.4,loophole-gorgonSound_EQ-out.mp3,,,Fm,132,Bbm,132.87,EQ-out
+You're in my system,"Kerri Chandler, Dennis Quin, Troy Denari - You Are In My System (Club Mix).mp3",Blackwater,Octave One - Blackwater (128 full strings vo.mp3,0:02:29.2,0:02:58.2,0:01:30.3,0:01:45.3,youreInMySystem-blackwater_EQ-out.mp3,,,Bbm,128,Fm,128.23,EQ-out
+Blackwater,Octave One - Blackwater (128 full strings vo.mp3,Xapiadora (Extended Mix),Dj Windows 7 - Xapiadora (Extended Mix).mp3,0:07:37.2,0:08:06.2,0:00:20.4,0:00:44.4,blackwater-xapiadora_EQ-out.mp3,,,Fm,128.23,F#m,129,EQ-out
+Xapiadora(Extended Mix),Dj Windows 7 - Xapiadora (Extended Mix).mp3,Hardwire,Ruze - Hardwire.mp3,0:02:50.7,0:03:15.7,0:01:03.3,0:01:25.3,xapiadora-hardwire_EQ-out.mp3,,,F#m,129,Bb,129,EQ-out
+Who dares to believe in me,The Believers - Who Dares To Believe In Me_.mp3,Who loves the sun,"Nu, Ateyaba - Who Loves The Sun (Original Mix).mp3",0:07:36.1,0:07:48,0:01:04,0:01:36,whoDaresToBelieve-whoLovesTheSun_EQ-out.mp3,,,Am,121,Ebm,120,EQ-out
+Who loves the sun,"Nu, Ateyaba - Who Loves The Sun (Original Mix).mp3",On my knees,RÜFÜS - On My Knees (Adriatique Remix).mp3,0:05:58,0:06:38,0:00:52,0:01:08,whoLovesTheSun-onMyKnees_CROSSFADE.mp3,,,Ebm,120,Fm,120,Crossfade
+On my knees,RÜFÜS - On My Knees (Adriatique Remix).mp3,Begin again,Ben Böhmer - Begin Again.mp3,0:06:35,0:07:02,0:00:31.9,0:00:53.7,onMyKnees-beginAgain_EQ-out.mp3,,,Fm,120,B,121,EQ-out
+Begin again,Ben Böhmer - Begin Again.mp3,Does it matter,"Samm (be), Ajna (BE) - Does It Matter (Ajna BE Remix).mp3",0:02:25,0:02:36.9,0:00:56.1,0:01:22,beginAgain-doesItMatter_CROSSFADE.mp3,,,B,121,Gm,120,Crossfade
+Debris,dublon - debris.mp3,Outta here,dublon - Outta Here.mp3,0:03:32.3,0:03:55,0:00:22.1,0:00:37.1,debris-outtaHere_EQ-out.mp3,,,Dm,112,A,112,EQ-out
+Outta here,dublon - Outta Here.mp3,Ascension,Berlioz - ascension.mp3,0:02:02.8,0:02:21.8,0:00:58.5,0:01:15.2,outtaHere-ascension-EQ-out.mp3,,,A,112,Dm,115,EQ-out
+Ascension,Berlioz - ascension.mp3,Viceral,dublon - Viceral.mp3,0:02:35.3,0:02:59.1,0:00:51.3,0:01:02.6,ascension-viceral_EQ-out.mp3,,,Dm,115,Bbm,116,EQ-out
+Viceral,dublon - Viceral.mp3,Gone are the days,Nujabes - Gone Are the Days (feat. Uyama Hiroto).mp3,0:01:38.9, 0:01:55.9,0:00:12.9,0:00:25.5,viceral-goneAreTheDays_EQ-out.mp3,,,Bbm,116,B,115,EQ-out
+Gone are the days,Nujabes - Gone Are the Days (feat. Uyama Hiroto).mp3,Belle,dublon - Belle.mp3,0:01:43.7,0:02:00.7,0:00:05.2,0:00:13.4,goneAreTheDays-belle_EQ-out.mp3,,,B,115,Bbm,117,EQ-out
+Belle,dublon - Belle.mp3,I Lost 200€ in a Club,Tell - I Lost 200€ in a Club.mp3,0:01:06.7,0:01:25.2,0:00:36.9,0:00:53.3,belle-iLost200€InAClub_EQ-out.mp3,,,Bbm,117,Bbm,117.3,EQ-out
+I Lost 200€ in a Club,Tell - I Lost 200€ in a Club.mp3,Take four,Bolden. - Take Four.mp3,0:03:32.9,0:03:53.2,0:00:28.3,0:00:40.5,iLost200€InAClub-takeFour_EQ-out.mp3,,,Bbm,117.3,Ebm,118,Crossfade
+Take four,Bolden. - Take Four.mp3,Jazz is for ordinary people,Berlioz - jazz is for ordinary people.mp3,0:02:15.6,0:02:38.6,0:00:38.8,0:00:58.2,takeFour-JazzIsForOrdinaryPeople_EQ-out.mp3,,,Ebm,118,Cm,119,EQ-out
+Jazz is for ordinary people,Berlioz - jazz is for ordinary people.mp3,Ode to rahsaan,Berlioz - ode to rahsaan.mp3,0:02:20.7,0:02:33.8,0:00:36.8,0:00:48.9,jazzIsForOrdinaryPeople-odeToRahsaan_EQ-out.mp3,,,Cm,119,Abm,119,EQ-out
+Ode to rahsaan,Berlioz - ode to rahsaan.mp3,Cream,Claptone - Cream.mp3,0:02:48.1,0:03:14.1,0:01:08,0:01:28,odeToRahsaan-cream_EQ-out.mp3,,,Abm,119,Fm,120,EQ-out
+Cream,Claptone - Cream.mp3,Need a break,LAMANT - NEED A BREAK.mp3,0:02:52,0:03:18,0:00:40.3,0:00:48.2,cream-needABreak_EQ-out.mp3,,,Fm,120,Gm,120,EQ-out
+Need a break,LAMANT - NEED A BREAK.mp3,Keep it real,Loure - Keep It Real.mp3,0:01:50.3,0:02:01.3,0:00:34,0:00:50.5,needABreak-keepItReal_CROSSFADE.mp3,,,Gm,120,F#m,120,Crossfade
+Keep it real,Loure - Keep It Real.mp3,Cachalote,Made in M - Cachalote.mp3,0:02:00,0:02:23,0:00:40,0:00:51,keepItReal-cachalote_EQ-out.mp3,,,F#m,120,Dm,120,EQ-out
+Cachalote,Made in M - Cachalote.mp3,Who loves the sun,"Nu, Ateyaba - Who Loves The Sun (Original Mix).mp3",0:01:31,0:02:08,0:01:04,0:01:14,cachalote-whoLovesTheSun_EQ-out.mp3,,,Dm,120,Ebm,120,EQ-out

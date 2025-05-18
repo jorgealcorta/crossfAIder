@@ -24,7 +24,8 @@ eggs/
 .eggs/
 lib/
 lib64/
-res/
+res/audio
+res/mel_specs
 outputs/
 parts/
 sdist/
