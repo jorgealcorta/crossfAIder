@@ -6,7 +6,7 @@ import json
 import os
 
 class MelTransitionDataset(Dataset):
-    def __init__(self, dataset_path, config_path, spectrogram_path):
+    def __init__(self, dataset_path, config_path, spectrogram_path, pad_strat):
         self.df = pd.read_csv(dataset_path)
         self.spec_path = spectrogram_path
 
@@ -15,6 +15,8 @@ class MelTransitionDataset(Dataset):
 
         # Precompute max spectrogram time, mean and std to normalize later
         self.max_time, self.mean, self.std = self._compute_statistics()
+        assert pad_strat == "silence" or pad_strat == "reflect", f"{pad_strat} is not valid! Choose 'silence' or 'reflect'"
+        self.pad_strat = pad_strat
 
     def _compute_statistics(self):
         max_time = 0
@@ -56,7 +58,10 @@ class MelTransitionDataset(Dataset):
             start_time=start_time,
             end_time=end_time,
         )
-        return self._pad_with_min(trimmed_spec, max_time)
+        if self.pad_strat == "silence":
+            return self._pad_with_silence(trimmed_spec, max_time)
+        else:
+            return self._pad_with_reflect(trimmed_spec, max_time)
 
     def _trim_spectrogram(self, spectrogram, start_time, end_time):
         """
@@ -81,18 +86,36 @@ class MelTransitionDataset(Dataset):
         
         return spectrogram[:, start_frame:end_frame] 
 
-    def _pad_with_min(self, spectrogram, target_time):
-        """Pad the spectrogram with zeroes."""
+    def _pad_with_silence(self, spectrogram, target_time):
+        """Pad the spectrogram with silence"""
         current_time = spectrogram.shape[-1]
         min_db = self.config["min_db"]
 
         if current_time < target_time:
             # min-padding
             pad_width = ((0, 0), (0, target_time - current_time))
-            padded_spec = np.pad(spectrogram, pad_width, mode='constant', constant_values=min_db)
-            return padded_spec
+            return np.pad(spectrogram, pad_width, mode='constant', constant_values=min_db)
         else:
             return spectrogram 
+
+    def _pad_with_reflect(self, spectrogram, target_time):
+        """Pad the spectrogram with it's own reflection"""
+        current_time = spectrogram.shape[-1]
+
+        if current_time < target_time:
+            # Pad symmetrically with reflection
+            pad_total = target_time - current_time
+            pad_left = pad_total // 2
+            pad_right = pad_total - pad_left
+            
+            return np.pad(
+                spectrogram,
+                ((0, 0), (pad_left, pad_right)),
+                mode='reflect'
+            )
+        else:
+            # Trim to exact target_time
+            return spectrogram[:, :target_time]
 
     def __len__(self):
         return len(self.df)
@@ -100,10 +123,15 @@ class MelTransitionDataset(Dataset):
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
     
-        # Load and trim and pad all spectrograms using metadata
+        # Load, trim and pad all spectrograms using metadata
         mel_a = self._load_trim_pad(row['mel_a_path'], row['start_time_a'], row['end_time_a'], self.max_time)
         mel_b = self._load_trim_pad(row['mel_b_path'], row['start_time_b'], row['end_time_b'], self.max_time)
-        mel_t = self._pad_with_min(np.load(os.path.join(self.spec_path, row['mel_tr_path'])), self.max_time)
+        # Load and pad transition (doesn't need trimming)
+        mel_t = np.load(os.path.join(self.spec_path, row['mel_tr_path']))
+        if self.pad_strat == "silence":
+            mel_t = self._pad_with_silence(mel_t, self.max_time)
+        else:
+            mel_t = self._pad_with_reflect(mel_t, self.max_time)
 
         # Normalize
         mel_a = (mel_a - self.mean) / self.std
@@ -121,7 +149,7 @@ class MelTransitionDataset(Dataset):
 if __name__ == "__main__":
 
     dataset = MelTransitionDataset(
-        dataset_path="../../res/datasets/transition_dataset_processed_III.csv", 
+        dataset_path="../../res/datasets/transition_dataset_processed_IV.csv", 
         config_path="../../res/config/config.json",
         spectrogram_path="../../res/mel_specs"
         )
