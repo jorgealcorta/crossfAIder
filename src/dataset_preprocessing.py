@@ -14,6 +14,15 @@ TRANSITIONS_DIR = os.path.join(AUDIO_DIR, "transitions")
 
 PRE_TRANSITION_DURATION = 0
 
+AUGMENTATIONS = [
+    {'name': 'original', 'func': None},  # Base case
+    {'name': 'noise', 'func': lambda y: add_noise(y, 0.003)},
+    {'name': 'pitch_up', 'func': lambda y: pitch_shift(y, SAMPLE_RATE, 0.5)},
+    {'name': 'pitch_down', 'func': lambda y: pitch_shift(y, SAMPLE_RATE, -0.5)},
+    {'name': 'gain_+2db', 'func': lambda y: adjust_gain(y, 2)},
+    {'name': 'gain_-2db', 'func': lambda y: adjust_gain(y, -2)},
+]
+
 os.makedirs(MEL_DIR, exist_ok=True)
 os.makedirs(DATASET_DIR, exist_ok=True)
 
@@ -68,64 +77,72 @@ def time_to_seconds(time_str):
         return parts[0] * 3600 + parts[1] * 60 + parts[2]
     return 0.0
 
+# --- Data augmentation functions ---------------------------------------------------- |
+def add_noise(y, noise_level=0.005):
+    noise = np.random.normal(0, noise_level, len(y))
+    augmented = y + noise
+    return np.clip(augmented, -1.0, 1.0)
+
+def pitch_shift(y, sr, n_steps):
+    return librosa.effects.pitch_shift(y, sr=sr, n_steps=n_steps)
+
+def adjust_gain(y, db):
+    augmented = y * (10 ** (db / 20))
+    return np.clip(augmented, -1.0, 1.0)
+
 def process_row(row):
-    # Debug
-    print(f"Processing transition '{row['transition_filename']}'")
+    all_rows = []
+    
+    for aug in AUGMENTATIONS:
+        # Process audio with augmentation
+        suffix = f"_{aug['name']}" if aug['name'] != 'original' else ''
+        
+        # Load and augment audio
+        def process_audio(path, dir_type='tracks'):
+            full_path = os.path.join(TRACKS_DIR if dir_type == 'tracks' else TRANSITIONS_DIR, path)
+            y, _ = librosa.load(full_path, sr=SAMPLE_RATE)
+            if aug['func']:
+                y = aug['func'](y)
+            return audio_to_mel(y)
 
-    # Convert time formats to seconds
-    times = {
-        'start_time_a': time_to_seconds(row['start_time_a']),
-        'end_time_a': time_to_seconds(row['end_time_a']),
-        'start_time_b': time_to_seconds(row['start_time_b']),
-        'end_time_b': time_to_seconds(row['end_time_b'])
-    }
-    
-    # Process Track A
-    track_a_path = os.path.join(TRACKS_DIR, row['track_a_filename'])
-    y_a, _ = librosa.load(track_a_path, sr=SAMPLE_RATE)
-    mel_a = audio_to_mel(y_a)
-    
-    # Process Track B
-    track_b_path = os.path.join(TRACKS_DIR, row['track_b_filename'])
-    y_b, _ = librosa.load(track_b_path, sr=SAMPLE_RATE)
-    mel_b = audio_to_mel(y_b)
-    
-    # Process Transition
-    transition_path = os.path.join(TRANSITIONS_DIR,  row['transition_filename'])
-    y_tr, _ = librosa.load(transition_path, sr=SAMPLE_RATE)
-    mel_tr = audio_to_mel(y_tr)
-    
-    # Save MEL spectrograms
-    mel_a_path = os.path.join( MEL_DIR, f"mel_track_{Path(row['track_a_filename']).stem}.npy" )
-    mel_b_path = os.path.join( MEL_DIR, f"mel_track_{Path(row['track_b_filename']).stem}.npy" )
-    mel_tr_path = os.path.join( MEL_DIR, f"mel_transition_{Path(row['transition_filename']).stem}.npy" )
-    
-    for path_db, mel_db in [
-        (mel_a_path, mel_a),
-        (mel_b_path, mel_b), 
-        (mel_tr_path, mel_tr)
-        ]:
+        try:
+            mel_a = process_audio(row['track_a_filename'])
+            mel_b = process_audio(row['track_b_filename'])
+            mel_tr = process_audio(row['transition_filename'], 'transitions')
 
-        if not os.path.exists(path_db):
-            save_mel(str(path_db), mel_db) 
+            # Save MELs
+            mel_a_path = os.path.join(MEL_DIR, f"mel_track_{Path(row['track_a_filename']).stem}{suffix}.npy")
+            mel_b_path = os.path.join(MEL_DIR, f"mel_track_{Path(row['track_b_filename']).stem}{suffix}.npy")
+            mel_tr_path = os.path.join(MEL_DIR, f"mel_transition_{Path(row['transition_filename']).stem}{suffix}.npy")
+
+            for path, mel in [(mel_a_path, mel_a), (mel_b_path, mel_b), (mel_tr_path, mel_tr)]:
+                if not os.path.exists(path):
+                    save_mel(path, mel)
+
+            # Create new row entry
+            new_row = {
+                'track_a_path': row['track_a_filename'],
+                'track_b_path': row['track_b_filename'],
+                'transition_path': row['transition_filename'],
+                'start_time_a': time_to_seconds(row['start_time_a']),
+                'end_time_a': time_to_seconds(row['end_time_a']),
+                'start_time_b': time_to_seconds(row['start_time_b']),
+                'end_time_b': time_to_seconds(row['end_time_b']),
+                'key_a': row['key_a'],
+                'bpm_a': row['bpm_a'],
+                'key_b': row['key_b'],
+                'bpm_b': row['bpm_b'],
+                'transition_type': row['transition_type'],
+                'mel_a_path': os.path.basename(mel_a_path),
+                'mel_b_path': os.path.basename(mel_b_path),
+                'mel_tr_path': os.path.basename(mel_tr_path),
+            }
+            all_rows.append(pd.Series(new_row))
+            
+        except Exception as e:
+            print(f"Error processing {row['transition_filename']} with {aug['name']}: {str(e)}")
     
-    return pd.Series({
-        'track_a_path': str(row['track_a_filename']),
-        'track_b_path': str(row['track_b_filename']),
-        'transition_path': str(row['transition_filename']),
-        'start_time_a': times['start_time_a'],
-        'end_time_a': times['end_time_a'],
-        'start_time_b': times['start_time_b'],
-        'end_time_b': times['end_time_b'],
-        'key_a': row['key_a'],
-        'bpm_a': row['bpm_a'],
-        'key_b': row['key_b'],
-        'bpm_b': row['bpm_b'],
-        'transition_type': row['transition_type'],
-        'mel_a_path': str(os.path.basename(mel_a_path)),
-        'mel_b_path': str(os.path.basename(mel_b_path)),
-        'mel_tr_path': str(os.path.basename(mel_tr_path)),
-    })
+    return all_rows
 
 def process_dataset(csv_path, output_csv_path):
     """
@@ -137,9 +154,15 @@ def process_dataset(csv_path, output_csv_path):
     """
 
     df = pd.read_csv(csv_path)
-    processed = df.apply(process_row, axis=1)
-    processed.to_csv(output_csv_path, index=False)
-    print(f"✅ Dataset procesado guardado en {output_csv_path}")
+    df = df[df['transition_type'] == 'EQ-out']  # Filter non-EQ-out transitions
+    
+    processed_rows = []
+    for _, row in df.iterrows():
+        processed_rows.extend(process_row(row))
+    
+    processed_df = pd.DataFrame(processed_rows)
+    processed_df.to_csv(output_csv_path, index=False)
+    print(f"✅ Augmented dataset saved to {output_csv_path} (Total samples: {len(processed_df)} vs {len(df)} original samples)") 
 
 if __name__ == "__main__":
     csv_path = os.path.join(DATASET_DIR, "transition_dataset_raw.csv")
